@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Taskitos</title>  
+    <meta name="description" content="Os melhores scripts e bots para Sala do Futuro e CMSP. Automatizar tarefas, grátis e rápido!">  
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="https://taskitos.cupiditys.lol/styles.css?v=83">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">  
+    <link rel="icon" href="favicon.png">
+
+    <style>
+        /* Overlay de carregamento */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top: 5px solid #ff8000;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal de atividades */
+        #fakeActivityModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15,15,20,0.95);
+            color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            display: none;
+            z-index: 99999;
+            box-shadow: 0 0 20px rgba(255,128,0,0.4);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #fakeActivityModal h3 {
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ff8000;
+        }
+
+        .activity-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item p {
+            margin: 3px 0;
+        }
+
+        .close-modal, .fake-button {
+            margin-top: 10px;
+            background: #ff8000;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .close-modal:hover, .fake-button:hover {
+            background: #ff9933;
+        }
+
+        .modal-buttons {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        input[type="checkbox"] {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+    </style>
+</head>  
+
+<body>  
+    <div class="container">  
+        <header class="header">  
+            <div class="logo">  
+                <h1 data-text="Taskitos">Taskitos</h1>  
+                <p class="subtitle">para sala do futuro e cmsp!</p>  
+            </div>  
+        </header>  
+
+        <section id="loginSection" class="section">  
+            <div class="login-container">  
+                <button type="button" id="quickLoginBtn" class="quick-login-btn" style="display: none;">  
+                    <span>Contas Salvas</span>  
+                    <span class="badge" id="accountCount">0</span>  
+                </button>  
+                <h2>Login</h2>  
+                <form id="loginForm" class="login-form">  
+                    <div class="input-group">  
+                        <label for="studentId">RA</label>  
+                        <div class="input-wrapper">  
+                            <input type="text" id="studentId" placeholder="RA + dígito + sp | ex: 123456790sp" required>  
+                            <button type="button" id="clearStudentId" class="clear-btn hidden">×</button>  
+                        </div>  
+                    </div>  
+                      
+                    <div class="input-group">  
+                        <label for="password">Senha</label>  
+                        <div class="input-wrapper">  
+                            <input type="password" id="password" placeholder="Senha" required>  
+                            <button type="button" id="togglePassword" class="toggle-btn">👁</button>  
+                            <button type="button" id="clearPassword" class="clear-btn hidden">×</button>  
+                        </div>  
+                    </div>  
+
+                    <div class="input-group">  
+                        <altcha-widget   
+                            challengeurl="/api/altcha/challenge"  
+                            auto="onfocus"  
+                            hidefooter="true"  
+                            hidelogo="true"  
+                            language="pt-BR"  
+                            expire="120000">  
+                        </altcha-widget>  
+                    </div>  
+
+                    <div class="button-group">  
+                        <button type="button" id="loginNormal" class="btn btn-secondary">Atividades Pendentes</button>  
+                        <button type="button" id="loginOverdue" class="btn btn-secondary">Atividades Expiradas</button>  
+                    </div>  
+                </form>  
+            </div>  
+        </section>  
+    </div>  
+
+    <footer class="footer">  
+        Entre no nosso servidor do Discord  
+        <br><a href="https://discord.gg/platformdestroyer">Platform Destroyer - Discord</a>  
+        <br>feito por: cupiditys / Enzo / Talls  
+        <br>"Taskitos" nome por prongsfav  
+        <br>Baseado em Doritus  
+    </footer>  
+
+    <!-- Overlays e modais -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Carregando atividades...</p>
+    </div>
+
+    <div id="fakeActivityModal">
+        <h3>Atividades Pendentes</h3>
+        <div id="activityList"></div>
+        <div class="modal-buttons">
+            <button class="close-modal" onclick="closeFakeModal()">Fechar</button>
+            <button class="fake-button">Fazer lições</button>
+        </div>
+    </div>
+
+    <script>
+        // Enforce MinMax mantido
+        function enforceMinMax(input) {  
+            const min = parseInt(input.getAttribute('min'));  
+            const max = parseInt(input.getAttribute('max'));  
+            let value = parseInt(input.value);  
+            if (isNaN(value)) input.value = min;  
+            else if (value < min) input.value = min;  
+            else if (value > max) input.value = max;  
+        }
+
+        // Função simulada de login e carregamento
+        document.getElementById('loginNormal').addEventListener('click', function() {
+            const studentId = document.getElementById('studentId').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (studentId === "" || password === "") {
+                alert("Preencha RA e senha para continuar!");
+                return;
+            }
+
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = "flex";
+
+            setTimeout(() => {
+                overlay.style.display = "none";
+                showFakeActivities();
+            }, 2500); // tempo de carregamento simulado
+        });
+
+        // Mostra atividades falsas
+        function showFakeActivities() {
+            const modal = document.getElementById('fakeActivityModal');
+            const list = document.getElementById('activityList');
+            list.innerHTML = `
+                <div class="activity-item">
+                    <div>
+                        <p><strong>Matemática:</strong> Funções — prazo até 22/10</p>
+                        <p>Status: Pendente</p>
+                    </div>
+                    <input type="checkbox">
+                </div>
+                <div class="activity-item">
+                    <div>
+                        <p><strong>Português:</strong> Interpretação de texto — prazo até 23/10</p>
+                        <p>Status: Pendente</p>
+                    </div>
+                    <input type="checkbox">
+                </div>
+                <div class="activity-item">
+                    <div>
+                        <p><strong>História:</strong> Revolução Industrial — prazo até 25/10</p>
+                        <p>Status: Pendente</p>
+                    </div>
+                    <input type="checkbox">
+                </div>
+            `;
+            modal.style.display = "block";
+        }
+
+        function closeFakeModal() {
+            document.getElementById('fakeActivityModal').style.display = "none";
+        }
+    </script>
+</body>  
+</html>
